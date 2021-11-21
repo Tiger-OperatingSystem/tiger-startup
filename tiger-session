@@ -1,0 +1,14 @@
+#!/bin/bash
+
+[ -z "${XDG_CONFIG_HOME}" ] && export XDG_CONFIG_HOME="${HOME}/.config"
+
+[ ! -f "${XDG_CONFIG_HOME}/tiger-firstrun" ] && {
+  killall xfconfd
+  mkdir -p "${XDG_CONFIG_HOME}/"
+
+  yes | exec cp -ri "/etc/xdg/tiger-session"/* "${XDG_CONFIG_HOME}/"
+
+  touch "${XDG_CONFIG_HOME}/tiger-firstrun"
+}
+
+exec startxfce4
