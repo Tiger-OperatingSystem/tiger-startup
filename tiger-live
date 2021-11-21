@@ -1,0 +1,60 @@
+#!/bin/bash
+
+mkdir -p "/etc/gcrypt/"
+
+# Se o sistema estiver em maquina virtual, o APT para de funcionar em 
+# alguns laptops Intel
+
+hostnamectl | grep -q "Chassis: vm"$ && {
+  echo all | tee "/etc/gcrypt/hwf.deny" | grep -q all && {
+    echo 1
+  } || {
+    echo 0
+  }
+}
+
+
+# Reabilita o autologin perdido devido a remoção de alguns pacotes
+# faz sentido mudar o nome do usuário :)
+df | grep -w / | grep -q ^'/cow' && {
+  usermod -l live ubuntu
+  usermod -d /home/live -m live
+  
+  [ -d "/home/ubuntu" ] && {
+    rm -rf "/home/ubuntu"
+  }
+  
+  (
+    echo "[SeatDefaults]"
+    echo "allow-guest=false"
+    echo "autologin-guest=false"
+    echo "autologin-user=live"
+    echo "autologin-user-timeout=0"
+    echo "[Seat:*]"
+    echo "user-session=tiger-session"
+  ) | tee "/etc/lightdm/lightdm.conf"
+
+  hostnamectl set-hostname live-system
+
+  # Define o fuso-horário pra o sistema live
+  timezone=$(wget -q -O - 'https://geoip.ubuntu.com/lookup' | grep -o '<Time.*Zone>' | sed 's|<TimeZone>||g;s|<.*>||g')
+  rm -rf /etc/localtime
+  ln -s "/usr/share/zoneinfo/${timezone}" /etc/localtime
+
+  # pkexec está quebrado em modo live com XFCE/LXCE, substituir ele por sudo -E resolve ver http://pad.lv/1193526
+  [ ! -f "/bin/pkexec.wrapped" ] && {
+    mv /bin/pkexec /bin/pkexec.wrapped
+    (
+      echo '#!/bin/bash'
+      echo "df | grep -w / | grep -q ^'/cow' && {"
+      echo '  sudo --preserve-env=DBUS_SESSION_BUS_ADDRESS,XDG_RUNTIME_DIR ${@}'
+      echo '  exit ${?}'
+      echo '}'
+      echo 'pkexec.wrapped ${@}'
+    ) | tee /bin/pkexec
+
+    chmod +x /bin/pkexec
+  }
+}
+
+exit 0
