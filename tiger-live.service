@@ -1,0 +1,12 @@
+[Unit]
+Description=Tiger Live Service...
+Before=NetworkManager.service
+    
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/tiger-live
+User=root
+Group=root
+    
+[Install]
+WantedBy=multi-user.target
