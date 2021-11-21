@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Just enable tiger-live service :)
+
+systemctl enable tiger-live
