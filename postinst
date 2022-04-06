@@ -2,4 +2,6 @@
 
 # Just enable tiger-live service :)
 
-systemctl enable tiger-live
+# systemctl enable tiger-live
+
+exit 0
