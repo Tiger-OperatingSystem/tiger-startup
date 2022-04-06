@@ -30,7 +30,7 @@ chmod -v a+x "${working_dir}/DEBIAN/postinst"
 (
  echo "Package: tiger-startup"
  echo "Priority: required"
- echo "Version: 1.0"
+ echo "Version: $(date +%y.%m.%d%H%M%S)"
  echo "Architecture: all"
  echo "Maintainer: Natanael Barbosa Santos"
  echo "Depends: "
